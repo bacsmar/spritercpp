@@ -105,17 +105,17 @@ namespace Spriter
 			}
 		}
 
-		std::vector<TimelineObjectReference> ScmlReference::GetTimelineObjects()
-		{
-			std::vector<TimelineObjectReference> results = std::vector<TimelineObjectReference>();
+		void ScmlReference::GetTimelineObjects(std::vector<TimelineObjectReference> &results)
+		{			
 			if (Reference != nullptr && getEntityID() != INVALID && getAnimationID() != INVALID)
 			{
 				Animation *CurrentAnimation = GetCurrentAnimation();
 
 				MainlineKey *CurrentMainlineKey = GetCurrentMainlineKey(CurrentAnimation);
 
-				std::vector<TimelineObjectReference> BoneReferences = std::vector<TimelineObjectReference>();
-
+				std::vector<TimelineObjectReference> BoneReferences;
+				BoneReferences.reserve(30);
+#if 1
 				for (size_t i = 0; i < CurrentMainlineKey->BoneReferences.size(); i++)
 				{
 					BoneReference *CurrentBoneReference = CurrentMainlineKey->BoneReferences[i];
@@ -124,19 +124,23 @@ namespace Spriter
 					int TimelineKeyIndex = CurrentBoneReference->Key;
 					int NextTimelineKeyIndex = TimelineKeyIndex;
 
-					if (NextTimelineKeyIndex < CurrentAnimation->Timelines->at(TimelineIndex)->Keys.size() - 1)
+					//if (NextTimelineKeyIndex < CurrentAnimation->Timelines->at(TimelineIndex)->Keys.size() - 1)
+					if (NextTimelineKeyIndex < CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys.size() - 1)
 					{
 						NextTimelineKeyIndex++;
 					}
 
-					TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[TimelineKeyIndex];
-					TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[NextTimelineKeyIndex];
+					//TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[TimelineKeyIndex];
+					//TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[NextTimelineKeyIndex];
+					TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[TimelineKeyIndex];
+					TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[NextTimelineKeyIndex];
 
 					bool ConnectToFirstFrame = false;
 
 					if (CurrentMainlineKey->ID == CurrentAnimation->MainlineKeys->size() - 1 && CurrentAnimation->Looping && PrimaryTimelineKey->ID > 0)
 					{
-						SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->at(0)->BoneReferences[i])->Key];
+						//SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->at(0)->BoneReferences[i])->Key];
+						SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->operator[](0)->BoneReferences[i])->Key];
 						ConnectToFirstFrame = true;
 					}
 
@@ -160,8 +164,10 @@ namespace Spriter
 
 					BoneReferences.push_back(Bone);
 				}
-
-				for (size_t i = 0; i < CurrentMainlineKey->ObjectReferences.size(); i++)
+#endif
+#if 1
+				size_t currentMainlineKeySize = CurrentMainlineKey->ObjectReferences.size();
+				for (size_t i = 0; i < currentMainlineKeySize; i++)
 				{
 					MainlineObjectReference *CurrentObjectReference = CurrentMainlineKey->ObjectReferences[i];
 
@@ -169,45 +175,41 @@ namespace Spriter
 					int TimelineKeyIndex = CurrentObjectReference->Key;
 					int NextTimelineKeyIndex = TimelineKeyIndex;
 
-					if (NextTimelineKeyIndex < (CurrentAnimation->Timelines->at(TimelineIndex)->Keys).size() - 1)
+					//if (NextTimelineKeyIndex < (CurrentAnimation->Timelines->at(TimelineIndex)->Keys).size() - 1)					
+					if (NextTimelineKeyIndex < (CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys).size() - 1)
 					{
 						NextTimelineKeyIndex++;
 					}
 
-					TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[TimelineKeyIndex];
-					TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[NextTimelineKeyIndex];
+					//TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[TimelineKeyIndex];
+					//TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[NextTimelineKeyIndex];
+					TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[TimelineKeyIndex];
+					TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[NextTimelineKeyIndex];
 
 					bool ConnectToFirstFrame = false;
 
 					if (CurrentMainlineKey->ID == CurrentAnimation->MainlineKeys->size() - 1 && CurrentAnimation->Looping && PrimaryTimelineKey->ID > 0)
 					{
 						//SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->at(0)->ObjectReferences[i])->Key];
+						SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->operator[](0)->ObjectReferences[i])->Key];
 						ConnectToFirstFrame = true;
 					}
 
 					TimelineObject *PrimaryTimelineObject = PrimaryTimelineKey->Object;
 					TimelineObjectReference Object;
-
-					try
+					
+					if (PrimaryTimelineKey == SecondaryTimelineKey)
 					{
-						if (PrimaryTimelineKey == SecondaryTimelineKey)
-						{
-							Object = GetTimelineObjectReference(PrimaryTimelineObject, PrimaryTimelineKey->Spin);
-						}
-						else
-						{
-							float Progress = (static_cast<float>(Milliseconds - PrimaryTimelineKey->Time)) / (float)((ConnectToFirstFrame ? CurrentAnimation->Length : SecondaryTimelineKey->Time) - PrimaryTimelineKey->Time);
-
-							TimelineObject *SecondaryTimelineObject = SecondaryTimelineKey->Object;
-
-							Object = GetInterpolatedTimelineObjectReference(PrimaryTimelineObject, SecondaryTimelineObject, PrimaryTimelineKey->Spin, Progress);
-						}
+						Object = GetTimelineObjectReference(PrimaryTimelineObject, PrimaryTimelineKey->Spin);
 					}
-					catch (std::exception &e1)
+					else
 					{
-						continue;
-					}
+						float Progress = (static_cast<float>(Milliseconds - PrimaryTimelineKey->Time)) / (float)((ConnectToFirstFrame ? CurrentAnimation->Length : SecondaryTimelineKey->Time) - PrimaryTimelineKey->Time);
 
+						TimelineObject *SecondaryTimelineObject = SecondaryTimelineKey->Object;
+
+						Object = GetInterpolatedTimelineObjectReference(PrimaryTimelineObject, SecondaryTimelineObject, PrimaryTimelineKey->Spin, Progress);
+					}					
 					if (CurrentObjectReference->Parent != MainlineObjectReference::DEFAULT_PARENT)
 					{
 						Object = ApplyTransformations(BoneReferences[CurrentObjectReference->Parent], Object);
@@ -217,10 +219,10 @@ namespace Spriter
 					Object.FolderID = PrimaryTimelineObject->Folder_Renamed;
 
 					results.push_back(Object);
+					
 				}
-			}
-
-			return results;
+#endif
+			}			
 		}
 
 		void ScmlReference::SetCurrentEntity(Entity *pEntity)
