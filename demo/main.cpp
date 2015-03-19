@@ -7,7 +7,7 @@
 
 #include "spriter/ScmlLoader.h"
 #include "SMFLAnimatedSprite.h"
-#include "spriter/FileStream.h"
+#include "FileStream.h"
 
 
 //using namespace Spriter;
@@ -38,7 +38,7 @@ int main()
 
 	Spriter::SMFLAnimatedSprite skeletalAnimation(scmlobject, ola );
 
-	skeletalAnimation.animate(*skeletalAnimation.getAnimations()[1]);
+	skeletalAnimation.animate(*skeletalAnimation.getAnimations()[0]);
 	skeletalAnimation.setPosition(200,300);				
 
 	//Create timer to get frame time
