@@ -43,7 +43,7 @@ namespace Spriter
 
 			void Update(int pMilliseconds);
 
-			std::vector<TimelineObjectReference> GetTimelineObjects();
+			void GetTimelineObjects(std::vector<TimelineObjectReference> &results);
 
 
 		private:

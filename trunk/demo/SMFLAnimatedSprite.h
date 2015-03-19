@@ -6,14 +6,31 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <sfml/Graphics/RenderTarget.hpp>
 
-#include "ScmlLoader.h"
-#include "ScmlObject.h"
-#include "ScmlReference.h"
-#include "TimelineObjectReference.h"
-#include "Animation.h"
-#include "Entity.h"
-#include "Folder.h"
-#include "File.h"
+#include "spriter/ScmlLoader.h"
+#include "spriter/ScmlObject.h"
+#include "spriter/ScmlReference.h"
+#include "spriter/TimelineObjectReference.h"
+#include "spriter/Animation.h"
+#include "spriter/Entity.h"
+#include "spriter/Folder.h"
+#include "spriter/File.h"
+
+#ifdef _DEBUG
+	#pragma comment(lib, "sfml-audio-d.lib")
+	#pragma comment(lib, "sfml-graphics-d.lib")
+	#pragma comment(lib, "sfml-main-d.lib")
+	#pragma comment(lib, "sfml-network-d.lib")
+	#pragma comment(lib, "sfml-system-d.lib")
+	#pragma comment(lib, "sfml-window-d.lib")
+	#pragma comment(lib, "spriter_cpp.lib")
+#else
+	#pragma comment(lib, "sfml-audio.lib")
+	#pragma comment(lib, "sfml-graphics.lib")
+	#pragma comment(lib, "sfml-main.lib")
+	#pragma comment(lib, "sfml-network.lib")
+	#pragma comment(lib, "sfml-system.lib")
+	#pragma comment(lib, "sfml-window.lib")
+#endif
 
 namespace Spriter 
 {
@@ -86,7 +103,8 @@ namespace Spriter
 			states.transform = getTransform() * states.transform.scale( -1,1 );
 
 			//for (auto s : _runTime->GetTimelineObjects())
-			std::vector<TimelineObjectReference> objects = _runTime->GetTimelineObjects();
+			std::vector<TimelineObjectReference> objects;
+			_runTime->GetTimelineObjects(objects);
 			std::vector<TimelineObjectReference>::const_iterator iter = objects.begin();
 			std::vector<TimelineObjectReference>::const_iterator end = objects.end();
 
