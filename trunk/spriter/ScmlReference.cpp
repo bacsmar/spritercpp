@@ -65,7 +65,7 @@ namespace Spriter
 		{
 			if (Reference != nullptr && getEntityID() != INVALID)
 			{
-				SetCurrentAnimation((Reference->Entities->at(getEntityID())->Animations)->Lookup(pName));
+				SetCurrentAnimation((Reference->Entities->operator [](getEntityID())->Animations)->Lookup(pName));
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace Spriter
 		{
 			if (Reference != nullptr && getEntityID() != INVALID)
 			{
-				SetCurrentAnimation((Reference->Entities->at(getEntityID())->Animations)->Lookup(pID));
+				SetCurrentAnimation((Reference->Entities->operator [](getEntityID())->Animations)->Lookup(pID));
 			}
 		}
 
@@ -113,9 +113,9 @@ namespace Spriter
 
 				MainlineKey *CurrentMainlineKey = GetCurrentMainlineKey(CurrentAnimation);
 
-				std::vector<TimelineObjectReference> BoneReferences;
+				BoneReferences.clear();
 				BoneReferences.reserve(30);
-#if 1
+#if 1 
 				for (size_t i = 0; i < CurrentMainlineKey->BoneReferences.size(); i++)
 				{
 					BoneReference *CurrentBoneReference = CurrentMainlineKey->BoneReferences[i];
@@ -123,15 +123,12 @@ namespace Spriter
 					int TimelineIndex = CurrentBoneReference->Timeline_Renamed;
 					int TimelineKeyIndex = CurrentBoneReference->Key;
 					int NextTimelineKeyIndex = TimelineKeyIndex;
-
-					//if (NextTimelineKeyIndex < CurrentAnimation->Timelines->at(TimelineIndex)->Keys.size() - 1)
+					
 					if (NextTimelineKeyIndex < CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys.size() - 1)
 					{
 						NextTimelineKeyIndex++;
 					}
 
-					//TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[TimelineKeyIndex];
-					//TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[NextTimelineKeyIndex];
 					TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[TimelineKeyIndex];
 					TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[NextTimelineKeyIndex];
 
@@ -139,7 +136,6 @@ namespace Spriter
 
 					if (CurrentMainlineKey->ID == CurrentAnimation->MainlineKeys->size() - 1 && CurrentAnimation->Looping && PrimaryTimelineKey->ID > 0)
 					{
-						//SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->at(0)->BoneReferences[i])->Key];
 						SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->operator[](0)->BoneReferences[i])->Key];
 						ConnectToFirstFrame = true;
 					}
@@ -148,18 +144,18 @@ namespace Spriter
 
 					if (PrimaryTimelineKey == SecondaryTimelineKey)
 					{
-						Bone = GetTimelineObjectReference(PrimaryTimelineKey->Bone, PrimaryTimelineKey->Spin);
+						 GetTimelineObjectReference(Bone, PrimaryTimelineKey->Bone, PrimaryTimelineKey->Spin);
 					}
 					else
 					{
 						float Progress = (static_cast<float>(Milliseconds - PrimaryTimelineKey->Time)) / ((ConnectToFirstFrame ? CurrentAnimation->Length : SecondaryTimelineKey->Time) - PrimaryTimelineKey->Time);
 
-						Bone = GetInterpolatedTimelineObjectReference(PrimaryTimelineKey->Bone, SecondaryTimelineKey->Bone, PrimaryTimelineKey->Spin, Progress);
+						GetInterpolatedTimelineObjectReference(Bone, PrimaryTimelineKey->Bone, SecondaryTimelineKey->Bone, PrimaryTimelineKey->Spin, Progress);
 					}
 
 					if (CurrentMainlineKey->BoneReferences[i]->Parent != BoneReference::DEFAULT_PARENT)
 					{
-						Bone = ApplyTransformations(BoneReferences[CurrentBoneReference->Parent], Bone);
+						ApplyTransformations(BoneReferences[CurrentBoneReference->Parent], Bone);
 					}
 
 					BoneReferences.push_back(Bone);
@@ -174,15 +170,12 @@ namespace Spriter
 					int TimelineIndex = CurrentObjectReference->Timeline_Renamed;
 					int TimelineKeyIndex = CurrentObjectReference->Key;
 					int NextTimelineKeyIndex = TimelineKeyIndex;
-
-					//if (NextTimelineKeyIndex < (CurrentAnimation->Timelines->at(TimelineIndex)->Keys).size() - 1)					
+					
 					if (NextTimelineKeyIndex < (CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys).size() - 1)
 					{
 						NextTimelineKeyIndex++;
 					}
 
-					//TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[TimelineKeyIndex];
-					//TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[NextTimelineKeyIndex];
 					TimelineKey *PrimaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[TimelineKeyIndex];
 					TimelineKey *SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[NextTimelineKeyIndex];
 
@@ -190,7 +183,6 @@ namespace Spriter
 
 					if (CurrentMainlineKey->ID == CurrentAnimation->MainlineKeys->size() - 1 && CurrentAnimation->Looping && PrimaryTimelineKey->ID > 0)
 					{
-						//SecondaryTimelineKey = CurrentAnimation->Timelines->at(TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->at(0)->ObjectReferences[i])->Key];
 						SecondaryTimelineKey = CurrentAnimation->Timelines->operator[](TimelineIndex)->Keys[(CurrentAnimation->MainlineKeys->operator[](0)->ObjectReferences[i])->Key];
 						ConnectToFirstFrame = true;
 					}
@@ -200,7 +192,7 @@ namespace Spriter
 					
 					if (PrimaryTimelineKey == SecondaryTimelineKey)
 					{
-						Object = GetTimelineObjectReference(PrimaryTimelineObject, PrimaryTimelineKey->Spin);
+						GetTimelineObjectReference(Object, PrimaryTimelineObject, PrimaryTimelineKey->Spin);
 					}
 					else
 					{
@@ -208,11 +200,11 @@ namespace Spriter
 
 						TimelineObject *SecondaryTimelineObject = SecondaryTimelineKey->Object;
 
-						Object = GetInterpolatedTimelineObjectReference(PrimaryTimelineObject, SecondaryTimelineObject, PrimaryTimelineKey->Spin, Progress);
+						GetInterpolatedTimelineObjectReference(Object, PrimaryTimelineObject, SecondaryTimelineObject, PrimaryTimelineKey->Spin, Progress);
 					}					
 					if (CurrentObjectReference->Parent != MainlineObjectReference::DEFAULT_PARENT)
 					{
-						Object = ApplyTransformations(BoneReferences[CurrentObjectReference->Parent], Object);
+						ApplyTransformations(BoneReferences[CurrentObjectReference->Parent], Object);
 					}
 
 					Object.FileID = PrimaryTimelineObject->File_Renamed;
@@ -256,7 +248,7 @@ namespace Spriter
 
 		Animation *ScmlReference::GetCurrentAnimation()
 		{
-			return (Reference->Entities->at(getEntityID())->Animations)->at(getAnimationID());
+			return (Reference->Entities->operator [](getEntityID())->Animations)->operator [](getAnimationID());
 		}
 
 		Spriter::MainlineKey *ScmlReference::GetCurrentMainlineKey(Animation *pAnimation)
@@ -265,7 +257,7 @@ namespace Spriter
 
 			for (size_t i = KeyID; i < pAnimation->MainlineKeys->size(); i++)
 			{
-				if (pAnimation->MainlineKeys->at(i)->Time <= Milliseconds)
+				if (pAnimation->MainlineKeys->operator [](i)->Time <= Milliseconds)
 				{
 					KeyID = i;
 				}
@@ -275,12 +267,11 @@ namespace Spriter
 				}
 			}
 
-			return pAnimation->MainlineKeys->at(KeyID);
+			return pAnimation->MainlineKeys->operator [](KeyID);
 		}
 
-		Spriter::TimelineObjectReference ScmlReference::GetInterpolatedTimelineObjectReference(TimelineObjectBase *pPrimaryTimelineObject, TimelineObjectBase *pSecondaryTimelineObject, int pSpin, float pProgress)
-		{
-			TimelineObjectReference objref;
+		void ScmlReference::GetInterpolatedTimelineObjectReference(TimelineObjectReference &objref, TimelineObjectBase *pPrimaryTimelineObject, TimelineObjectBase *pSecondaryTimelineObject, int pSpin, float pProgress)
+		{			
 
 			objref.AlphaMask = MathHelper::Linear(pPrimaryTimelineObject->AlphaMask, pSecondaryTimelineObject->AlphaMask, pProgress);
 			objref.Angle = MathHelper::AngleLinear(pPrimaryTimelineObject->Angle, pSecondaryTimelineObject->Angle, pProgress, pSpin); 
@@ -291,15 +282,11 @@ namespace Spriter
 			objref.ScaleY = MathHelper::Linear(pPrimaryTimelineObject->ScaleY, pSecondaryTimelineObject->ScaleY, pProgress);
 			objref.Spin = pSpin;
 			objref.X = MathHelper::Linear(pPrimaryTimelineObject->X, pSecondaryTimelineObject->X, pProgress);
-			objref.Y = MathHelper::Linear(pPrimaryTimelineObject->Y, pSecondaryTimelineObject->Y, pProgress);
-
-			return objref;
+			objref.Y = MathHelper::Linear(pPrimaryTimelineObject->Y, pSecondaryTimelineObject->Y, pProgress);			
 		}
 
-		Spriter::TimelineObjectReference ScmlReference::GetTimelineObjectReference(TimelineObjectBase *pTimelineObjectBase, int pSpin)
-		{
-			TimelineObjectReference objref;
-
+		void ScmlReference::GetTimelineObjectReference(TimelineObjectReference &objref, TimelineObjectBase *pTimelineObjectBase, int pSpin)
+		{			
 			objref.AlphaMask = pTimelineObjectBase->AlphaMask;
 			objref.Angle = pTimelineObjectBase->Angle;
 			objref.BlueMask = pTimelineObjectBase->BlueMask;
@@ -309,12 +296,10 @@ namespace Spriter
 			objref.ScaleY = pTimelineObjectBase->ScaleY;
 			objref.Spin = pSpin; 
 			objref.X = pTimelineObjectBase->X;
-			objref.Y = pTimelineObjectBase->Y;
-
-			return objref;
+			objref.Y = pTimelineObjectBase->Y;			
 		}
 
-		Spriter::TimelineObjectReference ScmlReference::ApplyTransformations(TimelineObjectReference pParentReference, TimelineObjectReference pChildReference)
+		void ScmlReference::ApplyTransformations(TimelineObjectReference &pParentReference, TimelineObjectReference &pChildReference)
 		{
 			pChildReference.Angle += pParentReference.Angle;
 			pChildReference.ScaleX *= pParentReference.ScaleX;
@@ -340,14 +325,14 @@ namespace Spriter
 			{
 				pChildReference.X = pParentReference.X;
 				pChildReference.Y = pParentReference.Y;
-			}
-
-			return pChildReference;
+			}			
 		}
 
+		static const float PIRAD = ((1/ 360.0f) * 2.0f * 3.141592654f);
 		float ScmlReference::GetRadians(float pAngle)
 		{
-			return static_cast<float>((pAngle / 360.0f) * 2.0f * 3.141592654f);
+			//return static_cast<float>((pAngle / 360.0f) * 2.0f * 3.141592654f);
+			return static_cast<float>(pAngle  * PIRAD);
 		}
 
 		void ScmlReference::InitializeInstanceFields()

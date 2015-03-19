@@ -40,6 +40,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)/source&quot;;&quot;$(SolutionDir)/externals/SFML/include&quot;;&quot;$(SolutionDir)/externals/pugixml/src&quot;;&quot;$(SolutionDir)/externals/&quot;;&quot;$(SolutionDir)/&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"

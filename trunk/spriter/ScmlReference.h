@@ -55,13 +55,16 @@ namespace Spriter
 
 			MainlineKey *GetCurrentMainlineKey(Animation *pAnimation);
 
-			TimelineObjectReference GetInterpolatedTimelineObjectReference(TimelineObjectBase *pPrimaryTimelineObject, TimelineObjectBase *pSecondaryTimelineObject, int pSpin, float pProgress);
+			inline void GetInterpolatedTimelineObjectReference(TimelineObjectReference &ref,TimelineObjectBase *pPrimaryTimelineObject, TimelineObjectBase *pSecondaryTimelineObject, int pSpin, float pProgress);
 
-			TimelineObjectReference GetTimelineObjectReference(TimelineObjectBase *pTimelineObjectBase, int pSpin);
+			inline void GetTimelineObjectReference(TimelineObjectReference &reference, TimelineObjectBase *pTimelineObjectBase, int pSpin);
 
-			TimelineObjectReference ApplyTransformations(TimelineObjectReference pParentReference, TimelineObjectReference pChildReference);
+			void ApplyTransformations(TimelineObjectReference &pParentReference, TimelineObjectReference &pChildReference);
 
 			float GetRadians(float pAngle);
+
+			// data
+			std::vector<TimelineObjectReference> BoneReferences;
 
 
 		private:
